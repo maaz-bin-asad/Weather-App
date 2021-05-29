@@ -18,18 +18,10 @@ app.use(bodyParser.urlencoded({
 }));
 
 app.set('view engine','ejs')
-var city = 'Delhi'
-API_KEY='4d707ab71bbd1aa79de4b50555312842'
-var url = `http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}`
-app.get('/', (req, res) => {
-    async function getWeather(){
-        const response = await fetch(url); 
-        let json = await response.json();
-        var desc=json.weather[0].description
-        var temperature=json.main.temp
+var API_KEY='4d707ab71bbd1aa79de4b50555312842'
 
-    }
-    getWeather();
+app.get('/', (req, res) => {
+    
     res.render('index')   
 })
 
@@ -43,7 +35,32 @@ app.get('/registerUser', (req, res) => {
 })
 
 app.get('/updateWeatherData', (req, res) =>{
-    res.send("Data updated")
+    var sql = `SELECT city FROM weather_data`
+    connection.query(sql, function (err, result) {
+        if (err) throw err;
+        for (obj of result){
+            var city=obj['city']
+            var url = `http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}`
+            async function getWeather(){
+                const response = await fetch(url); 
+                let json = await response.json();
+                let desc=json.weather[0].description
+                let temperature=json.main.temp
+                console.log(desc)
+                console.log(temperature)
+                let sql = `UPDATE weather_data SET temperature=? , description=? WHERE city=?;` 
+                let values = [temperature, desc, city]
+                connection.query(sql,values, function (err, result) {
+                    if (err) throw err;
+                  });
+        
+            }
+            getWeather();
+        
+        }
+      });
+    res.redirect('/')
+    
 })
 
 app.post('/login_handle', (req, res) => {
@@ -55,12 +72,13 @@ app.post('/signup_handle', (req, res) => {
     var name=req.body.name;
     var email=req.body.email;
     var pass=req.body.pass;
-    var sql = `INSERT INTO users (name, email,password,city1,city2,city3) VALUES ?`;
+    var sql = `INSERT INTO users (username, email,password) VALUES ?`;
     var values = [  
-        [name, email, pass, 'Delhi', 'Shimla', 'Bengaluru']
-        ];        
+        [name, email, pass]
+        ];
     connection.query(sql,[values], function (err, result) {
         if (err) throw err;
+        console.log("Inserted")
       });   
     res.redirect("/")
 })
