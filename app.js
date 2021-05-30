@@ -72,7 +72,8 @@ app.get('/updateWeatherData', (req, res) => {  // route to update the data
             getWeather();
         }
       });
-    res.redirect('/')
+       res.send("<h3>The database has been updated successfully.</h3> <h1><a href='/'>Home</a></h1>")
+
     
 })
 
