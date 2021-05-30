@@ -72,7 +72,7 @@ app.get('/updateWeatherData', (req, res) => {  // route to update the data
             getWeather();
         }
       });
-       res.send("<h3>The database has been updated successfully.</h3> <h1><a href='/'>Home</a></h1>")
+       res.send("<h3>The database has been updated successfully.</h3> <h1><a href='/'>Home</a></h1><h1><a href='/profile'>Go to your profile</a></h1>")
 
     
 })
