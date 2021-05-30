@@ -7,3 +7,4 @@
 - Open localhost:3000 and you will see the app up and running.
 
 Once the skeleton of the database is created, you will need to signup from the app and continue testing it with various routes.
+[![Working demo of the project here](https://drive.google.com/file/d/1IMzJxemyig0jf6H_fa4LO6iNxO1FOPOb/view?usp=sharing)
