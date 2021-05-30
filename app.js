@@ -1,42 +1,49 @@
 const express = require('express')
 const path = require('path')
-const fetch = require("node-fetch");
+const fetch = require("node-fetch");  // for calling API
 var bodyParser = require('body-parser');
-var mysql = require('mysql')
-var connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database:'weather'
-  })
+var connection = require('./db'); // importing database credentials module
 
-connection.connect()  
-
-const app = express()
+const app = express()   // create express app
 
 app.use(bodyParser.urlencoded({
     extended: true
 }));
 
-app.set('view engine','ejs')
+app.set('view engine','ejs')  // set view engine as EJS
+
 var API_KEY='4d707ab71bbd1aa79de4b50555312842'
 
-var session_mail=null
+var session_mail = null   // variable to act like session storage when user is logged in, else if user is not logged in, it will remain null
+
+// Routes start here
+
 app.get('/', (req, res) => {
     res.render('index')   
 })
 
 app.get('/error', (req, res) => {
-    res.send("<h3>There was an issue while loading page. Either you are not registered user or having incorrent credentials</h3>")
+    res.send("<h3>There was an issue while loading page. Either you are not registered user or having incorrent credentials</h3> <h1><a href='/'>Go to home page</a></h1>")
 })
 
 app.get('/login', (req, res) => {
+        if(session_mail == null){
         res.render('login')
+        }
+        else{
+            res.redirect('/profile')
+        }
+})
+
+app.get('/logout', (req, res) => {
+    session_mail=null;
+    res.redirect('/login')
 })
 
 app.get('/registerUser', (req, res) => {
     res.render('signup')
 })
+
 app.get('/updateWeatherData', (req, res) => {
     var sql = `SELECT city FROM weather_data`
     connection.query(sql, function (err, result){
@@ -48,21 +55,21 @@ app.get('/updateWeatherData', (req, res) => {
                 let response = await fetch(url); 
                 let json = await response.json();
 
-                let desc=json.weather[0].description
+                let desc = json.weather[0].description
                 let temperature = json.main.temp
                 let min_temp = json.main.temp_min
                 let max_temp = json.main.temp_max
                 let wind_speed = json.wind.speed
                 let clouds = json.clouds.all
+
                 let sql = `UPDATE weather_data SET temperature=? , description=?, min_temperature=?, max_temperature=?, wind=?, cloud_percent=? WHERE city=?;` 
                 let values = [temperature, desc, min_temp, max_temp, wind_speed, clouds, city]
-                connection.query(sql,values, function (err, result) {
+                connection.query(sql, values, function (err, result) {
                     if (err) throw err;
                   });
         
             }
             getWeather();
-        
         }
       });
     res.redirect('/')
@@ -70,26 +77,37 @@ app.get('/updateWeatherData', (req, res) => {
 })
 
 app.get('/profile', (req, res) => {
-        if(session_mail!=null){
-        res.send("Logged in")
+        if(session_mail != null){
+        res.render("profile")
         }
         else{
             res.redirect('/login')
         }
 })
 
+app.get('/userWeatherData', (req, res) => {
+    let sql = `SELECT * FROM weather_data WHERE user_email=?`;
+    let values = [session_mail]
+    connection.query(sql, values, function (err, result) {
+        if (err) throw err;
+      res.render("data", {'weather_detail' : result})
+      });
+      
+      
+})
+
 app.post('/login_handle', (req, res) => {
     let email = req.body.email
     let pass = req.body.pass
     let sql = `SELECT * FROM users WHERE email=? AND password=?`;
-    let values =  [email, pass]
-    connection.query(sql,values, function (err, result) {
+    let values = [email, pass]
+    connection.query(sql, values, function(err, result) {
         if (err) throw err;
         if(result.length==0){
-            res.redirect('/error')
+            res.redirect('/error')  // if no record found with credentials, redirect to error route
         }
         else{
-            session_mail=email
+            session_mail = email    // else assign current mail to global variable that acts as a session variable 
             res.redirect('/profile')
         }
       });
@@ -123,7 +141,7 @@ app.post('/signup_handle', (req, res) => {
     let values = [  
         [name, email, pass]
         ];
-    connection.query(sql,[values], function (err, result) {
+    connection.query(sql, [values], function (err, result) {
         if (err) throw err;
         console.log("Inserted user")
       });   
@@ -131,6 +149,8 @@ app.post('/signup_handle', (req, res) => {
     //res.redirect("/updateWeatherData")
 })
 
-app.listen(3000, ()=>{
-    console.log("Port open")
+//Routes end here
+
+app.listen(3000, ()=>{  //open port 3000 to listen
+    console.log("Running")
 })

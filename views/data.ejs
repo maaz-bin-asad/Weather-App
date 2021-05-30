@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Weather details</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
+    <style>
+        body {
+  font-family: system-ui;
+  background:white;
+  text-align: center;
+}
+    </style>
+  </head>
+  <body>
+      <h3><a href="/profile">Back to your profile</a></h1>
+      <h3><a href="/">Go home to update the data</a></h1>
+        <h1>We fetched the latest data for you</h1>
+    <table class="table table-inverse">
+  <thead>
+    <tr>
+      <th>City</th>
+      <th>Temperature</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% for(var i=0; i < weather_detail.length; i++) { %>
+    <tr>
+        <td><%= weather_detail[i].city %></td>
+        <td><%= weather_detail[i].temperature %> K</td>
+        <td><%= weather_detail[i].description %></td>
+    </tr>
+    <% } %>
+  </tbody>
+</table>
+
+  </body>
+</html>
