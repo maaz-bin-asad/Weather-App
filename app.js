@@ -36,7 +36,7 @@ app.get('/login', (req, res) => {
 })
 
 app.get('/logout', (req, res) => {
-    session_mail=null;
+    session_mail=null;       // when user is not logged in, keep session mail as null
     res.redirect('/login')
 })
 
@@ -44,13 +44,13 @@ app.get('/registerUser', (req, res) => {
     res.render('signup')
 })
 
-app.get('/updateWeatherData', (req, res) => {
+app.get('/updateWeatherData', (req, res) => {  // route to update the data
     var sql = `SELECT city FROM weather_data`
     connection.query(sql, function (err, result){
         if (err) throw err;
-        for (obj of result){
+        for (obj of result){    // the loop iterates over the cities and updates the DB where that city is present
             let city=obj['city']
-            let url = `http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}`
+            let url = `http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}`  //call the API
             async function getWeather(){
                 let response = await fetch(url); 
                 let json = await response.json();
@@ -77,26 +77,56 @@ app.get('/updateWeatherData', (req, res) => {
 })
 
 app.get('/profile', (req, res) => {
-        if(session_mail != null){
+        if(session_mail != null){  // if user has logged in
         res.render("profile")
         }
-        else{
+        else{                                    
             res.redirect('/login')
         }
 })
 
 app.get('/userWeatherData', (req, res) => {
-    let sql = `SELECT * FROM weather_data WHERE user_email=?`;
+    let sql = `SELECT * FROM weather_data WHERE user_email=?`;  // select the rows where foreign key is current user's mail
     let values = [session_mail]
     connection.query(sql, values, function (err, result) {
         if (err) throw err;
-      res.render("data", {'weather_detail' : result})
+      res.render("data", {'weather_detail' : result})   // send all the rows as array of objects for rendering
       });
       
       
 })
+app.post('/setUserPreferences', (req, res)  => {   //route to set user preferences
+    request_obj=req.body;
+    var cities=[]
+    for(let param in request_obj){
+        if(request_obj[param]=='on'){
+            cities.push(param)
+        }
+    }
+    let sql = `DELETE FROM weather_data WHERE user_email=?` //delete previous rows having this mail
+    let email = [session_mail]
+    connection.query(sql, email, function(err, result) {
+        if (err) throw err;
+        console.log("Deleted")
+      });
+      let city1 = cities[0]
+      let city2 = cities[1]
+      let city3 = cities[2]
+      sql =  `INSERT INTO weather_data(city, user_email) VALUES?`   //insert updated rows
+      let rows = [
+          [city1, email],
+          [city2, email],
+          [city3, email]
+      ]
+      connection.query(sql,[rows], function(err, result) {
+          if (err) throw err;
+          console.log("Inserted new cities")
+        });
+    res.send("<h3>Your preferences have been updated successfully.</h3> <h1><a href='/updateWeatherData'>Home</a></h1>")
 
-app.post('/login_handle', (req, res) => {
+
+})
+app.post('/login_handle', (req, res) => {   // route to handle the login credentials
     let email = req.body.email
     let pass = req.body.pass
     let sql = `SELECT * FROM users WHERE email=? AND password=?`;
@@ -113,7 +143,7 @@ app.post('/login_handle', (req, res) => {
       });
 })
 
-app.post('/signup_handle', (req, res) => {
+app.post('/signup_handle', (req, res) => {   // route to handle signup data 
     request_obj=req.body;
     var cities=[]
     for(let param in request_obj){
@@ -144,9 +174,9 @@ app.post('/signup_handle', (req, res) => {
     connection.query(sql, [values], function (err, result) {
         if (err) throw err;
         console.log("Inserted user")
-      });   
-      res.redirect('/login')
-    //res.redirect("/updateWeatherData")
+      });
+    
+    res.redirect("/updateWeatherData")
 })
 
 //Routes end here

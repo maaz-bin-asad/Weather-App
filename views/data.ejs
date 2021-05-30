@@ -9,6 +9,10 @@
   font-family: system-ui;
   background:white;
   text-align: center;
+
+}
+#tab {
+  text-align: center;
 }
     </style>
   </head>
@@ -16,12 +20,17 @@
       <h3><a href="/profile">Back to your profile</a></h1>
       <h3><a href="/">Go home to update the data</a></h1>
         <h1>We fetched the latest data for you</h1>
+        <div id="tab">
     <table class="table table-inverse">
   <thead>
     <tr>
       <th>City</th>
       <th>Temperature</th>
       <th>Description</th>
+      <th>Minimum temperature</th>
+      <th>Maximum temperature</th>
+      <th>Wind speed</th>
+      <th>Cloud percentage</th>
     </tr>
   </thead>
 
@@ -31,10 +40,16 @@
         <td><%= weather_detail[i].city %></td>
         <td><%= weather_detail[i].temperature %> K</td>
         <td><%= weather_detail[i].description %></td>
+        <td><%= weather_detail[i].min_temperature %></td>
+        <td><%= weather_detail[i].max_temperature %></td>
+        <td><%= weather_detail[i].wind %></td>
+        <td><%= weather_detail[i].cloud_percent %></td>
+
     </tr>
     <% } %>
   </tbody>
 </table>
+</div>
 
   </body>
 </html>
