@@ -5,3 +5,5 @@
 - Create new database and tables according to the skeleton written in 'db_commands.sql' file.
 - Go to this directory in your terminal and type: nodemon app.js.
 - Open localhost:3000 and you will see the app up and running.
+
+Once the skeleton of the database is created, you will need to signup from the app and continue testing it with various routes.
